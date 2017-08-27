@@ -5,6 +5,7 @@ import { Hello } from "./components/Hello";
 
 
 function main() {
+    try{
     let canvas = document.createElement("canvas");
     document.body.appendChild(canvas);
     canvas.width = 1000;
@@ -24,9 +25,10 @@ function main() {
         //gainNode.connect(ctx.destination);
         visualize(canvas, analyser, ctx);
     }, (err: MediaStreamError) => {
-
+        alert(err);
     });
     console.log("ok");
+}catch(e){alert(e)}
 }
 
 
