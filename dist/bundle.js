@@ -80,26 +80,32 @@ var React = __webpack_require__(0);
 var ReactDOM = __webpack_require__(2);
 var Hello_1 = __webpack_require__(3);
 function main() {
-    var canvas = document.createElement("canvas");
-    document.body.appendChild(canvas);
-    canvas.width = 1000;
-    canvas.height = 500;
-    var ctx = new AudioContext();
-    var analyser = ctx.createAnalyser();
-    //analyser.minDecibels = -90;
-    //analyser.maxDecibels = -10;
-    //analyser.smoothingTimeConstant = 0.85;
-    var gainNode = ctx.createGain();
-    gainNode.gain.value = 0;
-    navigator.getUserMedia({ audio: true }, function (stream) {
-        var source = ctx.createMediaStreamSource(stream);
-        source.connect(analyser);
-        source.connect(gainNode);
-        //gainNode.connect(ctx.destination);
-        visualize(canvas, analyser, ctx);
-    }, function (err) {
-    });
-    console.log("ok");
+    try {
+        var canvas_1 = document.createElement("canvas");
+        document.body.appendChild(canvas_1);
+        canvas_1.width = 1000;
+        canvas_1.height = 500;
+        var ctx_1 = new AudioContext();
+        var analyser_1 = ctx_1.createAnalyser();
+        //analyser.minDecibels = -90;
+        //analyser.maxDecibels = -10;
+        //analyser.smoothingTimeConstant = 0.85;
+        var gainNode_1 = ctx_1.createGain();
+        gainNode_1.gain.value = 0;
+        navigator.getUserMedia({ audio: true }, function (stream) {
+            var source = ctx_1.createMediaStreamSource(stream);
+            source.connect(analyser_1);
+            source.connect(gainNode_1);
+            //gainNode.connect(ctx.destination);
+            visualize(canvas_1, analyser_1, ctx_1);
+        }, function (err) {
+            alert(err);
+        });
+        console.log("ok");
+    }
+    catch (e) {
+        alert(e);
+    }
 }
 function visualize(canvas, analyser, ctx) {
     var WIDTH = canvas.width;
