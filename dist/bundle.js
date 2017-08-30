@@ -60,25 +60,16 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
-
-module.exports = React;
-
-/***/ }),
-/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__(0);
-var ReactDOM = __webpack_require__(2);
-var Hello_1 = __webpack_require__(3);
 function main() {
     try {
         var canvas_1 = document.createElement("canvas");
@@ -88,7 +79,7 @@ function main() {
         var ctx_1 = new AudioContext();
         var analyser_1 = ctx_1.createAnalyser();
         //analyser.minDecibels = -90;
-        //analyser.maxDecibels = -10;
+        analyser_1.maxDecibels = -50;
         //analyser.smoothingTimeConstant = 0.85;
         var gainNode_1 = ctx_1.createGain();
         gainNode_1.gain.value = 0;
@@ -96,7 +87,7 @@ function main() {
             var source = ctx_1.createMediaStreamSource(stream);
             source.connect(analyser_1);
             source.connect(gainNode_1);
-            //gainNode.connect(ctx.destination);
+            gainNode_1.connect(ctx_1.destination);
             visualize(canvas_1, analyser_1, ctx_1);
         }, function (err) {
             alert(err);
@@ -112,74 +103,70 @@ function visualize(canvas, analyser, ctx) {
     var HEIGHT = canvas.height;
     var canvasCtx = canvas.getContext("2d");
     analyser.fftSize = 32768;
-    var bufferLengthAlt = 2000 * analyser.fftSize / ctx.sampleRate; //analyser.frequencyBinCount;
-    var dataArrayAlt = new Uint8Array(bufferLengthAlt);
+    var bufferLength = 2000 * analyser.fftSize / ctx.sampleRate; //analyser.frequencyBinCount;
+    var dataArray = new Uint8Array(bufferLength);
+    var bigPointsHist = [];
+    var loopCount = 0;
     canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
     var drawAlt = function () {
         requestAnimationFrame(drawAlt);
-        analyser.getByteFrequencyData(dataArrayAlt);
+        analyser.getByteFrequencyData(dataArray);
+        if ((loopCount++) % 8 == 0) {
+            var bigPoints = retrieveBig(dataArray);
+            if (bigPoints.length != 0) {
+                if (bigPointsHist.length >= 10) {
+                    bigPointsHist.shift();
+                }
+                bigPointsHist.push(bigPoints);
+            }
+        }
         canvasCtx.drawImage(canvas, 1, 0, WIDTH - 1, HEIGHT, 0, 0, WIDTH - 1, HEIGHT);
-        var barWidth = (WIDTH / bufferLengthAlt);
-        var x = 0;
         var max = 0;
         var maxFreq = 0;
-        for (var i = 0; i < bufferLengthAlt; i++) {
-            var mag = dataArrayAlt[i];
+        for (var i = 0; i < bufferLength; i++) {
+            var mag = dataArray[i];
             if (max < mag) {
                 max = mag;
                 maxFreq = i * ctx.sampleRate / analyser.fftSize;
             }
-            canvasCtx.fillStyle = 'rgb(' + mag + ',' + mag + ',' + mag + ')';
-            canvasCtx.fillRect(WIDTH - 1, (1 - i / bufferLengthAlt) * HEIGHT, WIDTH, (1 - (i + 1) / bufferLengthAlt) * HEIGHT);
+            canvasCtx.fillStyle = 'hsl(' + ((1 - mag / 256) * 240) + ',100%,50%)';
+            canvasCtx.fillRect(WIDTH - 1, (1 - i / bufferLength) * HEIGHT, WIDTH, (1 - (i + 1) / bufferLength) * HEIGHT);
         }
         document.getElementsByTagName("p")[0].innerText = "max = " + String(maxFreq) + "Hz";
+        document.getElementsByTagName("p")[1].innerText = "big points = " + bigPointsHist.map(function (bigPoints) {
+            return "[" + bigPoints.map(function (x) { return Math.floor(x * ctx.sampleRate / analyser.fftSize); }).join(", ") + "]";
+        }).join(", ");
     };
     drawAlt();
 }
-main();
-ReactDOM.render(React.createElement(Hello_1.Hello, { compiler: "TypeScript", framework: "React" }), document.getElementById("example"));
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports) {
-
-module.exports = ReactDOM;
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__(0);
-var Hello = (function (_super) {
-    __extends(Hello, _super);
-    function Hello() {
-        return _super !== null && _super.apply(this, arguments) || this;
+function retrieveBig(data) {
+    var length = data.length;
+    var res = [];
+    for (var i = 0; i < length; i++) {
+        if (data[i] > 250) {
+            if (res.length > 0 && res[res.length - 1][1] == i - 1) {
+                var _a = res[res.length - 1], start = _a[0], end = _a[1], repr = _a[2], max = _a[3];
+                if (data[i] > max) {
+                    max = data[i];
+                    repr = i;
+                }
+                res[res.length - 1] = [start, i, repr, max];
+            }
+            else {
+                res.push([i, i, i, data[i]]);
+            }
+        }
     }
-    Hello.prototype.render = function () {
-        return React.createElement("h1", null,
-            "Hello from ",
-            this.props.compiler,
-            " and ",
-            this.props.framework,
-            "!");
-    };
-    return Hello;
-}(React.Component));
-exports.Hello = Hello;
+    return res.map(function (tuple) {
+        var start = tuple[0], end = tuple[1], repr = tuple[2], max = tuple[3];
+        return repr;
+    });
+}
+main();
+/*ReactDOM.render(
+    <Hello compiler="TypeScript" framework="React" />,
+    document.getElementById("example")
+);  */ 
 
 
 /***/ })
