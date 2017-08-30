@@ -79,7 +79,7 @@ function main() {
         var ctx_1 = new AudioContext();
         var analyser_1 = ctx_1.createAnalyser();
         //analyser.minDecibels = -90;
-        analyser_1.maxDecibels = -50;
+        analyser_1.maxDecibels = -40;
         //analyser.smoothingTimeConstant = 0.85;
         var gainNode_1 = ctx_1.createGain();
         gainNode_1.gain.value = 0;
@@ -111,10 +111,10 @@ function visualize(canvas, analyser, ctx) {
     var drawAlt = function () {
         requestAnimationFrame(drawAlt);
         analyser.getByteFrequencyData(dataArray);
-        if ((loopCount++) % 8 == 0) {
+        if ((loopCount++) % 16 == 0) {
             var bigPoints = retrieveBig(dataArray);
             if (bigPoints.length != 0) {
-                if (bigPointsHist.length >= 10) {
+                if (bigPointsHist.length >= 6) {
                     bigPointsHist.shift();
                 }
                 bigPointsHist.push(bigPoints);
