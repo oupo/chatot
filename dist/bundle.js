@@ -102,7 +102,7 @@ function visualize(canvas, analyser, ctx) {
     var WIDTH = canvas.width;
     var HEIGHT = canvas.height;
     var canvasCtx = canvas.getContext("2d");
-    analyser.fftSize = 32768;
+    //analyser.fftSize = 32768;
     var bufferLength = 2000 * analyser.fftSize / ctx.sampleRate; //analyser.frequencyBinCount;
     var dataArray = new Uint8Array(bufferLength);
     var bigPointsHist = [];
@@ -111,7 +111,7 @@ function visualize(canvas, analyser, ctx) {
     var drawAlt = function () {
         requestAnimationFrame(drawAlt);
         analyser.getByteFrequencyData(dataArray);
-        if ((loopCount++) % 16 == 0) {
+        if ((loopCount++) % 1 == 0) {
             var bigPoints = retrieveBig(dataArray);
             if (bigPoints.length != 0) {
                 if (bigPointsHist.length >= 6) {
